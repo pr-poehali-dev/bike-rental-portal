@@ -1,27 +1,29 @@
-import React from 'react';
-import * as LucideIcons from 'lucide-react';
-import { LucideProps } from 'lucide-react';
 
-interface IconProps extends LucideProps {
+import { LucideIcon, LucideProps } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+
+interface IconProps extends Omit<LucideProps, "ref"> {
   name: string;
   fallback?: string;
 }
 
-const Icon: React.FC<IconProps> = ({ name, fallback = 'CircleAlert', ...props }) => {
-  const IconComponent = (LucideIcons as Record<string, React.FC<LucideProps>>)[name];
-
-  if (!IconComponent) {
-    // Если иконка не найдена, используем fallback иконку
-    const FallbackIcon = (LucideIcons as Record<string, React.FC<LucideProps>>)[fallback];
-
-    // Если даже fallback не найден, возвращаем пустой span
-    if (!FallbackIcon) {
-      return <span className="text-xs text-gray-400">[icon]</span>;
-    }
-
-    return <FallbackIcon {...props} />;
+// Функция для безопасного получения иконки по имени
+const getIconByName = (name: string): LucideIcon | undefined => {
+  // Проверяем, существует ли иконка с таким именем
+  if (name in LucideIcons) {
+    return (LucideIcons as Record<string, LucideIcon>)[name];
   }
+  return undefined;
+};
 
+const Icon = ({ name, fallback = "HelpCircle", ...props }: IconProps) => {
+  const IconComponent = getIconByName(name) || getIconByName(fallback);
+  
+  if (!IconComponent) {
+    console.error(`Icon "${name}" не найдена и fallback "${fallback}" тоже не найден.`);
+    return null;
+  }
+  
   return <IconComponent {...props} />;
 };
 
